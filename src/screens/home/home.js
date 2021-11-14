@@ -4,6 +4,7 @@ import { useStyles } from "./styles";
 import One from "../../assets/artwork/one.jpg";
 import Two from "../../assets/artwork/two.jpg";
 import Three from "../../assets/artwork/three.jpg";
+import Footer from "../../components/important/footer/footer";
 
 export default function Home() {
 	const { home } = useStyles();
@@ -38,11 +39,11 @@ export default function Home() {
 					display: "flex",
 					height: "90vh",
 					flexDirection: "column",
-					padding: 10,
 					alignItems: "center",
 				}}
 			>
 				<div className={home}>{getArtWork()}</div>
+				<Footer />
 			</div>
 		</div>
 	);

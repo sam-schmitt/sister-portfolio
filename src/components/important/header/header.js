@@ -1,7 +1,17 @@
-import { AppBar, Toolbar, Typography, Button } from "@material-ui/core";
-import React from "react";
+import {
+	AppBar,
+	Toolbar,
+	Typography,
+	Button,
+	IconButton,
+	MenuItem,
+	Drawer,
+	Link,
+} from "@material-ui/core";
+import React, { useEffect, useState } from "react";
 import { useStyles } from "./styles";
 import { Link as RouterLink } from "react-router-dom";
+import { Menu } from "@material-ui/icons";
 
 export default function Header() {
 	const headersData = [
@@ -14,8 +24,27 @@ export default function Header() {
 			href: "/about",
 		},
 	];
-	const { header, logo, menuButton, toolbar } = useStyles();
+	const { header, logo, menuButton, toolbar, drawerContainer } = useStyles();
+	const [state, setState] = useState({
+		mobileView: false,
+		drawerOpen: false,
+	});
+	const { mobileView, drawerOpen } = state;
 
+	useEffect(() => {
+		const setResponsiveness = () => {
+			return window.innerWidth < 900
+				? setState((prevState) => ({ ...prevState, mobileView: true }))
+				: setState((prevState) => ({ ...prevState, mobileView: false }));
+		};
+
+		setResponsiveness();
+		window.addEventListener("resize", () => setResponsiveness());
+
+		return () => {
+			window.removeEventListener("resize", () => setResponsiveness());
+		};
+	}, []);
 	const displayDesktop = () => {
 		return (
 			<Toolbar className={toolbar}>
@@ -23,6 +52,55 @@ export default function Header() {
 				<div>{getMenuButtons()}</div>
 			</Toolbar>
 		);
+	};
+	const displayMobile = () => {
+		const handleDrawerOpen = () =>
+			setState((prevState) => ({ ...prevState, drawerOpen: true }));
+		const handleDrawerClose = () =>
+			setState((prevState) => ({ ...prevState, drawerOpen: false }));
+		return (
+			<Toolbar>
+				<IconButton
+					{...{
+						edge: "start",
+						color: "inherit",
+						"aria-label": "menu",
+						"aria-haspopup": true,
+						onClick: handleDrawerOpen,
+					}}
+				>
+					<Menu />
+				</IconButton>
+				<Drawer
+					{...{
+						anchor: "left",
+						open: drawerOpen,
+						onClose: handleDrawerClose,
+					}}
+				>
+					<div className={drawerContainer}>{getDrawerChoices()}</div>
+				</Drawer>
+				<div>{headerLogo}</div>
+			</Toolbar>
+		);
+	};
+
+	const getDrawerChoices = () => {
+		return headersData.map(({ label, href }) => {
+			return (
+				<Link
+					{...{
+						component: RouterLink,
+						to: href,
+						color: "inherit",
+						style: { textDecoration: "none" },
+						key: label,
+					}}
+				>
+					<MenuItem>{label}</MenuItem>
+				</Link>
+			);
+		});
 	};
 
 	const getMenuButtons = () => {
@@ -51,7 +129,10 @@ export default function Header() {
 
 	return (
 		<header>
-			<AppBar className={header}>{displayDesktop()}</AppBar>
+			<AppBar className={header}>
+				{" "}
+				{mobileView ? displayMobile() : displayDesktop()}
+			</AppBar>
 		</header>
 	);
 }
